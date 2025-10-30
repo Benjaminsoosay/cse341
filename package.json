@@ -23,5 +23,8 @@
     "express": "^5.1.0",
     "mongodb": "^6.20.0"
   },
-  "keywords": []
+  "engines": {
+    "node": "18.x"
+  }
 }
+
