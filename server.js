@@ -7,10 +7,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-
 app.get('/seed', async (req, res) => {
   try {
-    const Contact = require('./models/contact'); // Make sure this file exists: models/contact.js
+    const Contact = require('./models/contact');
     const count = await Contact.countDocuments();
 
     if (count === 0) {
@@ -53,19 +52,21 @@ app.get('/seed', async (req, res) => {
   }
 });
 
-
 console.log('MongoDB URI:', process.env.MONGODB_URI);
-
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Database is connected'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-
-const contactsRoutes = require('./routes/contacts'); // Make sure this file exists: routes/contacts.js
+const contactsRoutes = require('./routes/contacts');
 app.use('/contacts', contactsRoutes);
 
+// ✅ Add this root route just before app.listen
+app.get('/', (req, res) => {
+  res.send('Contacts API is running');
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
