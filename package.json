@@ -1,7 +1,6 @@
+
 {
-  "name": "cse341",
-  "version": "1.0.0",
-  "description": "my project ",
+  "description": "my project",
   "homepage": "https://github.com/Benjaminsoosay/cse341#readme",
   "bugs": {
     "url": "https://github.com/Benjaminsoosay/cse341/issues"
@@ -21,10 +20,12 @@
   "dependencies": {
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "mongodb": "^6.20.0"
+    "mongodb": "^6.20.0",
+    "mongoose": "^7.6.1"
   },
   "engines": {
     "node": "18.x"
   }
 }
+
 
