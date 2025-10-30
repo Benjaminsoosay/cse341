@@ -1,0 +1,5 @@
+GET https://contacts-api.onrender.com/contacts
+
+###
+
+GET https://contacts-api.onrender.com/contacts/6903178017d1674f85775784
