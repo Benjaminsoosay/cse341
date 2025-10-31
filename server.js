@@ -6,6 +6,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 
+<<<<<<< HEAD
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
@@ -26,11 +27,54 @@ app.get('/contacts', async (req, res) => {
   try {
     const contacts = await Contact.find();
     res.json(contacts);
+=======
+app.get('/seed', async (req, res) => {
+  try {
+    const Contact = require('./models/contact');
+    const count = await Contact.countDocuments();
+
+    if (count === 0) {
+      await Contact.insertMany([
+        {
+          firstName: 'Alice',
+          lastName: 'Johnson',
+          email: 'alice@example.com',
+          favoriteColor: 'Blue',
+          birthday: '1990-01-01'
+        },
+        {
+          firstName: 'Bob',
+          lastName: 'Smith',
+          email: 'bob@example.com',
+          favoriteColor: 'Green',
+          birthday: '1985-05-15'
+        },
+        {
+          firstName: 'Carol',
+          lastName: 'Lee',
+          email: 'carol@example.com',
+          favoriteColor: 'Red',
+          birthday: '1992-09-30'
+        },
+        {
+          firstName: 'Benjamin',
+          lastName: 'Senase',
+          email: 'iwuchukwubenjaminsoosay@gmail.com',
+          favoriteColor: 'Red',
+          birthday: '1984-02-12'
+        }
+      ]);
+      res.send('Seeded!');
+    } else {
+      res.send('Already seeded.');
+    }
+>>>>>>> 024d511fa67e18737e386f72a070c19463ebd462
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
+<<<<<<< HEAD
 // Route: Get all contacts with /project1 prefix
 app.get('/project1/contacts', async (req, res) => {
   try {
@@ -61,4 +105,23 @@ app.get('/contacts/:id', async (req, res) => {
 // Start server
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
+=======
+console.log('MongoDB URI:', process.env.MONGODB_URI);
+
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Database is connected'))
+  .catch((err) => console.error('MongoDB connection error:', err));
+
+const contactsRoutes = require('./routes/contacts');
+app.use('/contacts', contactsRoutes);
+
+// ✅ Add this root route just before app.listen
+app.get('/', (req, res) => {
+  res.send('Contacts API is running');
 });
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+>>>>>>> 024d511fa67e18737e386f72a070c19463ebd462
+});
+
