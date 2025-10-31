@@ -1,8 +1,13 @@
 const express = require('express');
-const router = express.Router();
-const { getAllContacts, getContactById } = require('../controllers/contacts');
+const app = express();
 
-router.get('/', getAllContacts);
-router.get('/:id', getContactById);
+// Import your contact route
+const contactRoutes = require('./routes/contactRoutes');
 
-module.exports = router;
+// Use the route
+app.use('/contacts', contactRoutes);
+
+// Start the server
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
