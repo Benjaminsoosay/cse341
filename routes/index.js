@@ -7,7 +7,7 @@ router.use('/api-docs', require('./swagger'));
 // Root route
 router.get('/', (req, res) => {
   // #swagger.tags = ['Hello World']
-  res.send('🚀 Welcome to your CSE341 API!');
+  res.send('Hello World');
 });
 
 // Users route
