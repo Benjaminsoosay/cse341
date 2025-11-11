@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { connectDB } = require('./data/database');
+const connectDB = require('./data/database'); // Make sure this matches your export
 const routes = require('./routes');
 
 const app = express();
@@ -11,26 +11,28 @@ app.use(bodyParser.json());
 
 // CORS headers setup
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept, x-key'
-    );
-    res.setHeader(
-        'Access-Control-Allow-Methods',
-        'GET, POST, PUT, DELETE, OPTIONS'
-    );
-    next();
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, x-key'
+  );
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, DELETE, OPTIONS'
+  );
+  next();
 });
 
 // Route handling
 app.use('/', routes);
 
-// Initialize database and start server
-connectDB().then(() => {
+// Connect to MongoDB and start server
+connectDB()
+  .then(() => {
     app.listen(port, () => {
-        console.log(`Database is connected. App running on port ${port}`);
+      console.log(`✅ Database is connected. App running on port ${port}`);
     });
-}).catch((err) => {
-    console.error('Database connection failed:', err);
-});
+  })
+  .catch((err) => {
+    console.error('❌ Database connection failed:', err);
+  });
