@@ -13,9 +13,9 @@
       "url": "https://opensource.org/licenses/MIT"
     }
   },
-  "host": "localhost:3000",
+  "host": "cse341-6.onrender.com",
   "basePath": "/",
-  "schemes": ["http", "https"],
+  "schemes": ["https"],
   "consumes": ["application/json"],
   "produces": ["application/json"],
   "paths": {
@@ -26,7 +26,7 @@
         "description": "Retrieves a list of all users in the system",
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "A list of users",
             "schema": {
               "type": "array",
               "items": {
