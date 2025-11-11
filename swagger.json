@@ -19,6 +19,7 @@
   "consumes": ["application/json"],
   "produces": ["application/json"],
   "paths": {
+<<<<<<< HEAD
     "/users": {
       "get": {
         "tags": ["Users"],
@@ -33,6 +34,22 @@
                 "$ref": "#/definitions/User"
               }
             }
+=======
+    "definitions": {
+  "User": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "email": {
+        "type": "string"
+         }
+         }
+>>>>>>> 6cd59652b1954c8dd4675169871beef9915f318f
           },
           "500": {
             "description": "Internal server error"
