@@ -1,0 +1,189 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "School API",
+    "version": "1.0"
+  },
+  "host": "localhost:3000",
+  "paths": {
+    "/courses": {
+      "get": {
+        "summary": "Get all courses",
+        "responses": {
+          "200": {"description": "OK"}
+        }
+      },
+      "post": {
+        "summary": "Add new course",
+        "security": [{"oauth2": []}],
+        "parameters": [{
+          "name": "body",
+          "in": "body",
+          "schema": {
+            "type": "object",
+            "required": ["courseId", "courseTitle", "instructor", "classMax", "startDate", "endDate"],
+            "properties": {
+              "courseId": {"type": "string"},
+              "courseTitle": {"type": "string"},
+              "instructor": {"type": "string"},
+              "classMax": {"type": "number"},
+              "currentEnrollment": {"type": "number"},
+              "startDate": {"type": "string"},
+              "endDate": {"type": "string"}
+            }
+          }
+        }],
+        "responses": {
+          "201": {"description": "Created"},
+          "400": {"description": "Bad request"},
+          "401": {"description": "Not authorized"}
+        }
+      }
+    },
+    "/courses/{id}": {
+      "get": {
+        "summary": "Get one course",
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "type": "string"
+        }],
+        "responses": {
+          "200": {"description": "OK"},
+          "404": {"description": "Not found"}
+        }
+      },
+      "put": {
+        "summary": "Update course",
+        "security": [{"oauth2": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "courseTitle": {"type": "string"},
+                "instructor": {"type": "string"},
+                "classMax": {"type": "number"},
+                "currentEnrollment": {"type": "number"},
+                "startDate": {"type": "string"},
+                "endDate": {"type": "string"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {"description": "Updated"},
+          "401": {"description": "Not authorized"},
+          "404": {"description": "Not found"}
+        }
+      },
+      "delete": {
+        "summary": "Delete course",
+        "security": [{"oauth2": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "type": "string"
+        }],
+        "responses": {
+          "200": {"description": "Deleted"},
+          "401": {"description": "Not authorized"},
+          "404": {"description": "Not found"}
+        }
+      }
+    },
+    "/instructors": {
+      "get": {
+        "summary": "Get instructors",
+        "responses": {
+          "200": {"description": "OK"}
+        }
+      },
+      "post": {
+        "summary": "Add instructor",
+        "security": [{"oauth2": []}],
+        "parameters": [{
+          "name": "body",
+          "in": "body",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "email": {"type": "string"}
+            }
+          }
+        }],
+        "responses": {
+          "201": {"description": "Created"},
+          "401": {"description": "Not authorized"}
+        }
+      }
+    },
+    "/instructors/{id}": {
+      "get": {
+        "summary": "Get one instructor",
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "type": "string"
+        }],
+        "responses": {
+          "200": {"description": "OK"}
+        }
+      },
+      "put": {
+        "summary": "Update instructor",
+        "security": [{"oauth2": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "email": {"type": "string"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {"description": "Updated"},
+          "401": {"description": "Not authorized"}
+        }
+      },
+      "delete": {
+        "summary": "Delete instructor",
+        "security": [{"oauth2": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "type": "string"
+        }],
+        "responses": {
+          "200": {"description": "Deleted"},
+          "401": {"description": "Not authorized"}
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "oauth2": {
+      "type": "oauth2",
+      "flow": "implicit",
+      "authorizationUrl": "/oauth"
+    }
+  }
+}
