@@ -1,30 +1,40 @@
-const getAllInstructors = (req, res) => {
-  res.status(200).json({ message: "All instructors returned" });
-};
+const instructors = [
+  { id: "1", name: "Bill Clements", email: "bill@example.com" },
+  { id: "2", name: "Paul Smith", email: "paul@example.com" }
+];
 
+const getAllInstructors = (req, res) => {
+  res.json(instructors);
+};
 
 const getInstructor = (req, res) => {
-  const id = req.params.id;
-  res.status(200).json({ message: `Instructor with id ${id}` });
+  const found = instructors.find(i => i.id === req.params.id);
+  if (!found) return res.status(404).send("Instructor not found");
+  res.json(found);
 };
-
 
 const createInstructor = (req, res) => {
-  const instructorData = req.body;
-  res.status(201).json({ message: "Instructor created", data: instructorData });
+  const body = req.body;
+  if (!body.name || !body.email) {
+    return res.status(400).send("Missing fields");
+  }
+  const newInstructor = { id: String(instructors.length + 1), ...body };
+  instructors.push(newInstructor);
+  res.status(201).json(newInstructor);
 };
 
-// PUT update an instructor
 const updateInstructor = (req, res) => {
-  const id = req.params.id;
-  const instructorData = req.body;
-  res.status(200).json({ message: `Instructor ${id} updated`, data: instructorData });
+  const idx = instructors.findIndex(i => i.id === req.params.id);
+  if (idx === -1) return res.status(404).send("Instructor not found");
+  instructors[idx] = { ...instructors[idx], ...req.body };
+  res.json(instructors[idx]);
 };
-
 
 const deleteInstructor = (req, res) => {
-  const id = req.params.id;
-  res.status(204).json({ message: `Instructor ${id} deleted` });
+  const idx = instructors.findIndex(i => i.id === req.params.id);
+  if (idx === -1) return res.status(404).send("Instructor not found");
+  const removed = instructors.splice(idx, 1);
+  res.json(removed[0]);
 };
 
 module.exports = {
@@ -34,4 +44,3 @@ module.exports = {
   updateInstructor,
   deleteInstructor
 };
-
