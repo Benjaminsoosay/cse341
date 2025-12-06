@@ -1,0 +1,773 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "CSE341 E-commerce API - Final Project Part 2",
+    "description": "**Course:** CSE341 Web Services<br>**Student:** Benjamin Soosay<br>**Project Requirements Met:**<br>✅ FOUR collections with CRUD operations<br>✅ Data validation on POST/PUT endpoints<br>✅ OAuth authentication for protected routes<br>✅ Unit tests for GET/GET ALL routes<br>✅ Deployed to Render.com<br><br><strong>Authentication:</strong><br>🔐 <a href='/auth/google'>Log In with Google OAuth</a><br>🚪 <a href='/auth/logout'>Log Out</a>",
+    "version": "1.0.0"
+  },
+  "host": "cse341-9.onrender.com",
+  "basePath": "/api",
+  "schemes": ["https", "http"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "sessionAuth": {
+      "type": "apiKey",
+      "name": "connect.sid",
+      "in": "cookie",
+      "description": "Session cookie authentication (OAuth protected routes)"
+    }
+  },
+  "tags": [
+    {"name": "Users", "description": "User management with validation and OAuth protection"},
+    {"name": "Products", "description": "Product management with validation and OAuth protection"},
+    {"name": "Reviews", "description": "Review management with data validation"},
+    {"name": "Orders", "description": "Order management with data validation"}
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all users",
+        "description": "Retrieve a list of all users. **Unit Tested**",
+        "responses": {
+          "200": {
+            "description": "Successful operation - Returns array of users",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {"type": "string", "example": "507f1f77bcf86cd799439011"},
+                  "name": {"type": "string", "example": "John Doe"},
+                  "email": {"type": "string", "example": "john@example.com"},
+                  "role": {"type": "string", "enum": ["user", "admin"], "example": "user"}
+                }
+              }
+            }
+          },
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create a new user (OAuth Protected)",
+        "description": "Create a new user account. **Requires OAuth authentication**<br>**Data Validation:** Name (2-100 chars), valid email format<br>**Error Handling:** Returns 400 for validation errors, 401 if not authenticated",
+        "security": [{"sessionAuth": []}],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["name", "email"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 100,
+                  "example": "John Doe",
+                  "description": "User's full name (2-100 characters)"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "john@example.com",
+                  "description": "Valid email address"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": ["user", "admin"],
+                  "default": "user",
+                  "description": "User role"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {"description": "User created successfully"},
+          "400": {
+            "description": "Validation Error - Missing or invalid fields",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {"type": "string", "example": "Validation failed"},
+                "message": {"type": "string", "example": "Name and email are required"}
+              }
+            }
+          },
+          "401": {"description": "Unauthorized - OAuth authentication required"},
+          "500": {"description": "Internal server error"}
+        }
+      }
+    },
+    
+    "/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user by ID",
+        "description": "Retrieve a specific user by ID. **Unit Tested**",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "User ID (MongoDB ObjectId)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {"type": "string"},
+                "name": {"type": "string"},
+                "email": {"type": "string"},
+                "role": {"type": "string"}
+              }
+            }
+          },
+          "404": {"description": "User not found"},
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update user (OAuth Protected)",
+        "description": "Update user information. **Requires OAuth authentication**<br>**Data Validation:** Name (2-100 chars), valid email format<br>**Error Handling:** Returns 400 for validation errors, 401 if not authenticated",
+        "security": [{"sessionAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "User ID (MongoDB ObjectId)"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 100,
+                  "example": "Updated Name"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "updated@example.com"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": ["user", "admin"]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {"description": "User updated successfully"},
+          "400": {"description": "Validation Error - Invalid data format"},
+          "401": {"description": "Unauthorized - OAuth authentication required"},
+          "404": {"description": "User not found"},
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Delete user (OAuth Protected)",
+        "description": "Delete a user account. **Requires OAuth authentication**",
+        "security": [{"sessionAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "User ID (MongoDB ObjectId)"
+          }
+        ],
+        "responses": {
+          "204": {"description": "User deleted successfully"},
+          "401": {"description": "Unauthorized - OAuth authentication required"},
+          "404": {"description": "User not found"},
+          "500": {"description": "Internal server error"}
+        }
+      }
+    },
+    
+    "/products": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get all products",
+        "description": "Retrieve a list of all products. **Unit Tested**",
+        "responses": {
+          "200": {
+            "description": "Successful operation - Returns array of products",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {"type": "string"},
+                  "name": {"type": "string"},
+                  "description": {"type": "string"},
+                  "price": {"type": "number"},
+                  "category": {"type": "string"},
+                  "stock": {"type": "integer"}
+                }
+              }
+            }
+          },
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "post": {
+        "tags": ["Products"],
+        "summary": "Create a new product (OAuth Protected)",
+        "description": "Create a new product. **Requires OAuth authentication**<br>**Data Validation:** Name (3-100 chars), price ≥ 0, category required<br>**Error Handling:** Returns 400 for validation errors, 401 if not authenticated",
+        "security": [{"sessionAuth": []}],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["name", "price", "category"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 100,
+                  "example": "Wireless Headphones",
+                  "description": "Product name (3-100 characters)"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "example": "Noise-cancelling wireless headphones"
+                },
+                "price": {
+                  "type": "number",
+                  "minimum": 0,
+                  "example": 99.99,
+                  "description": "Product price (must be ≥ 0)"
+                },
+                "category": {
+                  "type": "string",
+                  "example": "Electronics",
+                  "description": "Product category"
+                },
+                "stock": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "default": 0,
+                  "example": 100,
+                  "description": "Available stock (must be ≥ 0)"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {"description": "Product created successfully"},
+          "400": {
+            "description": "Validation Error - Missing required fields or invalid values",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {"type": "string", "example": "Validation failed"},
+                "message": {"type": "string", "example": "Price must be a positive number"}
+              }
+            }
+          },
+          "401": {"description": "Unauthorized - OAuth authentication required"},
+          "500": {"description": "Internal server error"}
+        }
+      }
+    },
+    
+    "/products/{id}": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get product by ID",
+        "description": "Retrieve a specific product by ID. **Unit Tested**",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Product ID (MongoDB ObjectId)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {"type": "string"},
+                "name": {"type": "string"},
+                "description": {"type": "string"},
+                "price": {"type": "number"},
+                "category": {"type": "string"},
+                "stock": {"type": "integer"}
+              }
+            }
+          },
+          "404": {"description": "Product not found"},
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "put": {
+        "tags": ["Products"],
+        "summary": "Update product (OAuth Protected)",
+        "description": "Update product information. **Requires OAuth authentication**<br>**Data Validation:** Name (3-100 chars), price ≥ 0, stock ≥ 0<br>**Error Handling:** Returns 400 for validation errors, 401 if not authenticated",
+        "security": [{"sessionAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Product ID (MongoDB ObjectId)"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 100
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 500
+                },
+                "price": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "category": {"type": "string"},
+                "stock": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {"description": "Product updated successfully"},
+          "400": {"description": "Validation Error - Invalid data format"},
+          "401": {"description": "Unauthorized - OAuth authentication required"},
+          "404": {"description": "Product not found"},
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "delete": {
+        "tags": ["Products"],
+        "summary": "Delete product (OAuth Protected)",
+        "description": "Delete a product. **Requires OAuth authentication**",
+        "security": [{"sessionAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Product ID (MongoDB ObjectId)"
+          }
+        ],
+        "responses": {
+          "204": {"description": "Product deleted successfully"},
+          "401": {"description": "Unauthorized - OAuth authentication required"},
+          "404": {"description": "Product not found"},
+          "500": {"description": "Internal server error"}
+        }
+      }
+    },
+    
+    "/reviews": {
+      "get": {
+        "tags": ["Reviews"],
+        "summary": "Get all reviews",
+        "description": "Retrieve a list of all reviews. **Unit Tested**",
+        "responses": {
+          "200": {
+            "description": "Successful operation - Returns array of reviews",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {"type": "string"},
+                  "productId": {"type": "string"},
+                  "userId": {"type": "string"},
+                  "rating": {"type": "integer"},
+                  "comment": {"type": "string"},
+                  "createdAt": {"type": "string", "format": "date-time"}
+                }
+              }
+            }
+          },
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "post": {
+        "tags": ["Reviews"],
+        "summary": "Create a new review",
+        "description": "Create a new product review.<br>**Data Validation:** Rating 1-5, productId and userId required<br>**Error Handling:** Returns 400 for validation errors",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["productId", "userId", "rating"],
+              "properties": {
+                "productId": {
+                  "type": "string",
+                  "example": "507f1f77bcf86cd799439011",
+                  "description": "ID of the product being reviewed"
+                },
+                "userId": {
+                  "type": "string",
+                  "example": "507f1f77bcf86cd799439012",
+                  "description": "ID of the user creating the review"
+                },
+                "rating": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5,
+                  "example": 5,
+                  "description": "Rating between 1 and 5"
+                },
+                "comment": {
+                  "type": "string",
+                  "maxLength": 1000,
+                  "example": "Excellent product! Highly recommend."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {"description": "Review created successfully"},
+          "400": {
+            "description": "Validation Error - Rating must be 1-5, required fields missing",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {"type": "string", "example": "Validation failed"},
+                "message": {"type": "string", "example": "Rating must be between 1 and 5"}
+              }
+            }
+          },
+          "404": {"description": "Product or user not found"},
+          "500": {"description": "Internal server error"}
+        }
+      }
+    },
+    
+    "/reviews/{id}": {
+      "get": {
+        "tags": ["Reviews"],
+        "summary": "Get review by ID",
+        "description": "Retrieve a specific review by ID. **Unit Tested**",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Review ID (MongoDB ObjectId)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {"type": "string"},
+                "productId": {"type": "string"},
+                "userId": {"type": "string"},
+                "rating": {"type": "integer"},
+                "comment": {"type": "string"},
+                "createdAt": {"type": "string", "format": "date-time"}
+              }
+            }
+          },
+          "404": {"description": "Review not found"},
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "put": {
+        "tags": ["Reviews"],
+        "summary": "Update review",
+        "description": "Update a product review.<br>**Data Validation:** Rating 1-5, comment max 1000 chars<br>**Error Handling:** Returns 400 for validation errors",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Review ID (MongoDB ObjectId)"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rating": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5,
+                  "example": 4
+                },
+                "comment": {
+                  "type": "string",
+                  "maxLength": 1000,
+                  "example": "Updated review comment"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {"description": "Review updated successfully"},
+          "400": {"description": "Validation Error - Invalid rating or comment too long"},
+          "404": {"description": "Review not found"},
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "delete": {
+        "tags": ["Reviews"],
+        "summary": "Delete review",
+        "description": "Delete a product review.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Review ID (MongoDB ObjectId)"
+          }
+        ],
+        "responses": {
+          "204": {"description": "Review deleted successfully"},
+          "404": {"description": "Review not found"},
+          "500": {"description": "Internal server error"}
+        }
+      }
+    },
+    
+    "/orders": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get all orders",
+        "description": "Retrieve a list of all orders. **Unit Tested**",
+        "responses": {
+          "200": {
+            "description": "Successful operation - Returns array of orders",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {"type": "string"},
+                  "userId": {"type": "string"},
+                  "products": {"type": "array"},
+                  "total": {"type": "number"},
+                  "status": {"type": "string"},
+                  "createdAt": {"type": "string", "format": "date-time"}
+                }
+              }
+            }
+          },
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Create a new order",
+        "description": "Create a new order.<br>**Data Validation:** userId required, products array with quantity ≥ 1<br>**Error Handling:** Returns 400 for validation errors, 409 if insufficient stock",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["userId", "products"],
+              "properties": {
+                "userId": {
+                  "type": "string",
+                  "example": "507f1f77bcf86cd799439011",
+                  "description": "ID of the user placing the order"
+                },
+                "products": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["productId", "quantity"],
+                    "properties": {
+                      "productId": {
+                        "type": "string",
+                        "example": "507f1f77bcf86cd799439012"
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "example": 2
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {"description": "Order created successfully"},
+          "400": {
+            "description": "Validation Error - Missing userId or invalid product quantities",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {"type": "string", "example": "Validation failed"},
+                "message": {"type": "string", "example": "Quantity must be at least 1"}
+              }
+            }
+          },
+          "409": {"description": "Conflict - Insufficient stock available"},
+          "500": {"description": "Internal server error"}
+        }
+      }
+    },
+    
+    "/orders/{id}": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get order by ID",
+        "description": "Retrieve a specific order by ID. **Unit Tested**",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Order ID (MongoDB ObjectId)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {"type": "string"},
+                "userId": {"type": "string"},
+                "products": {"type": "array"},
+                "total": {"type": "number"},
+                "status": {"type": "string"},
+                "createdAt": {"type": "string", "format": "date-time"}
+              }
+            }
+          },
+          "404": {"description": "Order not found"},
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "put": {
+        "tags": ["Orders"],
+        "summary": "Update order",
+        "description": "Update order information.<br>**Data Validation:** Status must be valid enum value<br>**Error Handling:** Returns 400 for validation errors",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Order ID (MongoDB ObjectId)"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": ["pending", "processing", "shipped", "delivered", "cancelled"],
+                  "example": "processing"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {"description": "Order updated successfully"},
+          "400": {"description": "Validation Error - Invalid status value"},
+          "404": {"description": "Order not found"},
+          "500": {"description": "Internal server error"}
+        }
+      },
+      "delete": {
+        "tags": ["Orders"],
+        "summary": "Delete order",
+        "description": "Delete an order.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Order ID (MongoDB ObjectId)"
+          }
+        ],
+        "responses": {
+          "204": {"description": "Order deleted successfully"},
+          "404": {"description": "Order not found"},
+          "500": {"description": "Internal server error"}
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ValidationError": {
+      "type": "object",
+      "properties": {
+        "error": {"type": "string", "example": "Validation failed"},
+        "message": {"type": "string", "example": "Required field missing or invalid"}
+      }
+    },
+    "UnauthorizedError": {
+      "type": "object",
+      "properties": {
+        "error": {"type": "string", "example": "Unauthorized"},
+        "message": {"type": "string", "example": "OAuth authentication required"}
+      }
+    }
+  }
+}
