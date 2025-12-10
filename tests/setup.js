@@ -23,6 +23,8 @@ jest.mock('../middleware/auth.js', () => ({
   }
 }));
 
+
+
 // Clean up after tests
 afterAll(async () => {
   // Close any open connections
