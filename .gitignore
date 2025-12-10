@@ -10,3 +10,7 @@ yarn-debug.log*
 yarn-error.log*
 coverage/
 .DS_Store
+.env
+.env.local
+*.env*
+node_modules/
